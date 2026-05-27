@@ -35,7 +35,6 @@ public class MiddleShip extends BasicSpaceship {
       
       if (!shipQueue.isEmpty()) {
          ShipCommand c = shipQueue.remove(0);
-         System.out.println("queue: " + c.getName());
          return c;
       }
 
@@ -44,16 +43,14 @@ public class MiddleShip extends BasicSpaceship {
          shipMass = shipStatus.getMass();
          maxSpeed = shipStatus.getMaxSpeed();
          startup = false;
-         System.out.println("did startup");
       }
 
       if (shipStatus.getSpeed() > 1.0) {
-         System.out.println("braking");
          return new BrakeCommand(0.0);
       }
 
       double distanceToCenter = shipStatus.getPosition().getDistanceTo(center);
-      if (distanceToCenter < 34.0) {
+      if (distanceToCenter < 69) {
          System.out.print(".");
          return new IdleCommand(0.1);
       }
@@ -91,7 +88,7 @@ public class MiddleShip extends BasicSpaceship {
       shipQueue.add(new RotateCommand(relativeAngle - 90 * dirCode));
 
       double timeToFullSpeed = maxSpeed * shipMass / thrustPower;
-      double timeToHalfDistance = Math.sqrt( (double)(distanceToCenter+35)*shipMass/thrustPower );
+      double timeToHalfDistance = Math.sqrt( (double)(distanceToCenter-45)*shipMass/thrustPower );
       if (timeToFullSpeed > timeToHalfDistance) {
          shipQueue.add(new ThrustCommand(towardCenterChar, timeToHalfDistance, 1.0, true));
          shipQueue.add(new ThrustCommand(awayFromCenterChar, timeToHalfDistance, 1.0, true));
@@ -112,7 +109,6 @@ public class MiddleShip extends BasicSpaceship {
       shipQueue.add(new BrakeCommand(0.0));
 
       //return first in queue
-      System.out.println("Going to center, starting with rotation");
       return shipQueue.remove(0);
       
     }
