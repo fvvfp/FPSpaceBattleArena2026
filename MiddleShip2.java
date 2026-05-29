@@ -14,7 +14,6 @@ public class MiddleShip2 extends BasicSpaceship {
    private boolean startup = true;
    private ArrayList<ShipCommand> shipQueue;
    private boolean justDidRadar = false;
-   private boolean healing = false;
 
     public static void main(String[] args)
     {
@@ -53,11 +52,11 @@ public class MiddleShip2 extends BasicSpaceship {
          return doTorpedo(shipStatus, env.getRadar());
       }
 
-      if (shipStatus.getSpeed() > 1.0) {
+      if (shipStatus.getSpeed() > 2.0) {
          return new BrakeCommand(0.0);
       }
       
-      if (shipStatus.getEnergy() > 30.0) {
+      if (shipStatus.getEnergy() > 20.0) {
          justDidRadar = true;
          return new RadarCommand(5);
       }
@@ -68,7 +67,6 @@ public class MiddleShip2 extends BasicSpaceship {
       }
       
       doMovement(shipStatus, distanceToCenter);
-      shipQueue.add(new BrakeCommand(0.0));
 
       //return first in queue
       return shipQueue.remove(0);
@@ -81,6 +79,14 @@ public class MiddleShip2 extends BasicSpaceship {
       for (ObjectStatus object : radarResults) {
          if (object.getType().equals("Ship") || object.getType().equals("Asteroid")) {
             double oScore = object.getSpeed();
+            int angleOffset = Math.abs(Math.abs(object.getMovementDirection() - shipStatus.getPosition().getAngleTo(object.getPosition())) - 180);
+            if (angleOffset <= 15) {
+               oScore *= -1.0;
+            } else {
+               oScore += object.getPosition().getDistanceTo(center) * 0.5;
+            }
+            //target chud ship???
+            
             if (oScore < score) {
                score = oScore;
                target = object;
@@ -89,9 +95,18 @@ public class MiddleShip2 extends BasicSpaceship {
       }
       
       if (target == null) return new IdleCommand(0.1);
-      
-      shipQueue.add(new FireTorpedoCommand('F'));
-      return new RotateCommand((shipStatus.getPosition().getAngleTo(target.getPosition())) - shipStatus.getOrientation());
+
+      int angleToTarget = shipStatus.getPosition().getAngleTo(target.getPosition());
+      int shipOrientation = shipStatus.getOrientation();
+      if (angleToTarget - shipOrientation < 0) angleToTarget += 360;
+      int relativeAngle = angleToTarget - shipOrientation;
+      int dirCode = (relativeAngle + 90) / 180;
+      if ((dirCode == 1) {
+         shipQueue.add(new FireTorpedoCommand('B'));
+      } else {
+         shipQueue.add(new FireTorpedoCommand('F'));
+      }
+      return new RotateCommand(relativeAngle - 180*dirCode);
     }
     
     public void doMovement(ObjectStatus shipStatus, double distanceToCenter) {
@@ -127,7 +142,7 @@ public class MiddleShip2 extends BasicSpaceship {
       shipQueue.add(new RotateCommand(relativeAngle - 90 * dirCode));
 
       double timeToFullSpeed = maxSpeed * shipMass / thrustPower;
-      double timeToHalfDistance = Math.sqrt( (double)(distanceToCenter-145)*shipMass/thrustPower );
+      double timeToHalfDistance = Math.sqrt( (double)(distanceToCenter-140)*shipMass/thrustPower );
       if (timeToFullSpeed > timeToHalfDistance) {
          shipQueue.add(new ThrustCommand(towardCenterChar, timeToHalfDistance, 1.0, true));
          shipQueue.add(new ThrustCommand(awayFromCenterChar, timeToHalfDistance, 1.0, true));
