@@ -56,14 +56,18 @@ public class MiddleShip2 extends BasicSpaceship {
          return new BrakeCommand(0.0);
       }
       
-      if (shipStatus.getEnergy() > 20.0) {
+      if (shipStatus.getEnergy() > 50.0) {
          justDidRadar = true;
          return new RadarCommand(5);
       }
 
       double distanceToCenter = shipStatus.getPosition().getDistanceTo(center);
       if (distanceToCenter < 175) {
-         return new IdleCommand(0.1);
+         if (shipStatus.getEnergy() >= 15) {
+            return new RadarCommand(5);
+         } else {
+            return new IdleCommand(0.1);
+         }
       }
       
       doMovement(shipStatus, distanceToCenter);
@@ -106,6 +110,7 @@ public class MiddleShip2 extends BasicSpaceship {
       } else {
          shipQueue.add(new FireTorpedoCommand('F'));
       }
+      shipQueue.add(new IdleCommand(0.2));
       return new RotateCommand(relativeAngle - 180*dirCode);
     }
     
