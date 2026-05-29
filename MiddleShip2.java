@@ -86,10 +86,13 @@ public class MiddleShip2 extends BasicSpaceship {
             int angleOffset = Math.abs(Math.abs(object.getMovementDirection() - shipStatus.getPosition().getAngleTo(object.getPosition())) - 180);
             if (angleOffset <= 15) {
                oScore *= -1.0;
-            } else {
+            } else if (object.getType().equals("Ship")) {
                oScore += object.getPosition().getDistanceTo(center) * 0.5;
+               //target chud ship???
+            } else {
+               oScore += 150.0;
             }
-            //target chud ship???
+
             
             if (oScore < score) {
                score = oScore;
